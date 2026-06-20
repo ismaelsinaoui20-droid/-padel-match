@@ -1,0 +1,1 @@
+ALTER TABLE "User" ALTER COLUMN "availableDates" SET DEFAULT ARRAY[]::TEXT[];

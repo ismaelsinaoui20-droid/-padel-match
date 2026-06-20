@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Level {
+  P25
+  P50
+  P100
+  P250
+  P500
+  P1000
+}
+
+enum GroupStatus {
+  OPEN
+  FULL
+  CONFIRMED
+}
+
+model User {
+  id             String   @id @default(uuid())
+  name           String
+  email          String   @unique
+  passwordHash   String
+  age            Int?
+  region         String?
+  level          Level?
+  availableDates String[] @default([])
+  isAdmin        Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  resetCode           String?
+  resetCodeExpiresAt  DateTime?
+
+  memberships       MatchGroupMember[]
+  messages          Message[]
+  timeVotes         TimeVote[]
+  courtBookingVotes CourtBookingVote[]
+  savedPlayers      SavedPlayer[]    @relation("Saver")
+  savedByPlayers     SavedPlayer[]    @relation("Saved")
+  reportsFiled      PlayerReport[]   @relation("Reporter")
+  reportsReceived   PlayerReport[]   @relation("Reported")
+  sentDirectMessages     DirectMessage[] @relation("DMSender")
+  receivedDirectMessages DirectMessage[] @relation("DMRecipient")
+}
+
+model DirectMessage {
+  id          String   @id @default(uuid())
+  sender      User     @relation("DMSender", fields: [senderId], references: [id])
+  senderId    String
+  recipient   User     @relation("DMRecipient", fields: [recipientId], references: [id])
+  recipientId String
+  content     String
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model SavedPlayer {
+  id          String   @id @default(uuid())
+  user        User     @relation("Saver", fields: [userId], references: [id])
+  userId      String
+  savedUser   User     @relation("Saved", fields: [savedUserId], references: [id])
+  savedUserId String
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, savedUserId])
+}
+
+model PlayerReport {
+  id             String   @id @default(uuid())
+  user           User     @relation("Reporter", fields: [userId], references: [id])
+  userId         String
+  reportedUser   User     @relation("Reported", fields: [reportedUserId], references: [id])
+  reportedUserId String
+  reason         String
+  createdAt      DateTime @default(now())
+}
+
+model MatchGroup {
+  id            String      @id @default(uuid())
+  level         Level
+  region        String
+  date          String
+  isDuo         Boolean     @default(false)
+  status        GroupStatus @default(OPEN)
+  confirmedTime String?
+  courtBooked   Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+
+  members           MatchGroupMember[]
+  messages          Message[]
+  timeVotes         TimeVote[]
+  courtBookingVotes CourtBookingVote[]
+}
+
+model CourtBookingVote {
+  id        String     @id @default(uuid())
+  group     MatchGroup @relation(fields: [groupId], references: [id])
+  groupId   String
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime   @default(now())
+
+  @@unique([groupId, userId])
+}
+
+model TimeVote {
+  id        String     @id @default(uuid())
+  group     MatchGroup @relation(fields: [groupId], references: [id])
+  groupId   String
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String
+  time      String
+  createdAt DateTime   @default(now())
+
+  @@unique([groupId, userId])
+}
+
+model MatchGroupMember {
+  id         String   @id @default(uuid())
+  group      MatchGroup @relation(fields: [groupId], references: [id])
+  groupId    String
+  user       User       @relation(fields: [userId], references: [id])
+  userId     String
+  joinedAt   DateTime   @default(now())
+  lastReadAt DateTime   @default(now())
+
+  @@unique([groupId, userId])
+}
+
+model Message {
+  id        String     @id @default(uuid())
+  group     MatchGroup @relation(fields: [groupId], references: [id])
+  groupId   String
+  user      User?      @relation(fields: [userId], references: [id])
+  userId    String?
+  content   String
+  createdAt DateTime   @default(now())
+}
