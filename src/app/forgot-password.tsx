@@ -22,10 +22,10 @@ export default function ForgotPasswordScreen() {
     setError(null);
     setIsSubmitting(true);
     try {
-      const { resetCode } = await api.forgotPassword(email.trim());
+      await api.forgotPassword(email.trim());
       router.push({
         pathname: '/reset-password',
-        params: { email: email.trim(), devCode: resetCode },
+        params: { email: email.trim() },
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Impossible de générer un code');

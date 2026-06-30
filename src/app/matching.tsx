@@ -178,19 +178,17 @@ export default function MatchingScreen() {
 
   useEffect(() => {
     if (!token) return;
-    const interval = setInterval(async () => {
-      const status = await api.getMatchStatus(token);
-      setGroups(status.groups);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [token]);
-
-  useEffect(() => {
-    if (!token) return;
     const fetchUnread = () => api.getUnreadDmCount(token).then((res) => setUnreadCount(res.count));
     fetchUnread();
-    const interval = setInterval(fetchUnread, 4000);
-    return () => clearInterval(interval);
+    const unreadInterval = setInterval(fetchUnread, 15000);
+    const statusInterval = setInterval(async () => {
+      const status = await api.getMatchStatus(token);
+      setGroups(status.groups);
+    }, 30000);
+    return () => {
+      clearInterval(unreadInterval);
+      clearInterval(statusInterval);
+    };
   }, [token]);
 
   const hasDuoGroup = groups.some((g) => g.isDuo);
@@ -224,9 +222,14 @@ export default function MatchingScreen() {
 
         <ThemedView style={styles.quickLinks}>
           <Link href="/account" style={styles.quickLink}>
+            <ThemedText type="link" themeColor="primaryStrong">
+              👤 Mon compte
+            </ThemedText>
+          </Link>
+          <Link href="/messages" style={styles.quickLink}>
             <ThemedView style={styles.quickLinkRow}>
               <ThemedText type="link" themeColor="primaryStrong">
-                👤 Mon compte
+                💬 Messages
               </ThemedText>
               <UnreadBadge count={unreadCount} />
             </ThemedView>

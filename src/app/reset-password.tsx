@@ -13,10 +13,10 @@ import { useTheme } from '@/hooks/use-theme';
 import { useAuth } from '@/lib/auth-context';
 
 export default function ResetPasswordScreen() {
-  const { email, devCode } = useLocalSearchParams<{ email: string; devCode?: string }>();
+  const { email } = useLocalSearchParams<{ email: string }>();
   const { resetPassword } = useAuth();
   const theme = useTheme();
-  const [code, setCode] = useState(devCode ?? '');
+  const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,14 +49,6 @@ export default function ResetPasswordScreen() {
           <ThemedText themeColor="textSecondary" style={styles.subtitle}>
             Code envoyé pour {email}. Valable 15 minutes.
           </ThemedText>
-
-          {devCode && (
-            <ThemedView style={[styles.devBox, { borderColor: theme.primary }]}>
-              <ThemedText type="smallBold" style={{ color: theme.primary }}>
-                Mode dev — ton code : {devCode}
-              </ThemedText>
-            </ThemedView>
-          )}
 
           <TextInput
             style={[styles.input, { borderColor: theme.border, color: theme.text }]}
@@ -103,7 +95,6 @@ const styles = StyleSheet.create({
   card: { gap: Spacing.three },
   title: { fontSize: 22, lineHeight: 28 },
   subtitle: { fontSize: 14 },
-  devBox: { borderWidth: 1.5, borderRadius: 14, padding: Spacing.three },
   input: {
     borderWidth: 1.5,
     borderRadius: 14,

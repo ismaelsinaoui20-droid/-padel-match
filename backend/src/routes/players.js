@@ -37,6 +37,11 @@ router.post('/:id/save', requireAuth, async (req, res) => {
     return res.status(400).json({ error: 'Cannot save yourself' });
   }
 
+  const target = await prisma.user.findUnique({ where: { id: savedUserId } });
+  if (!target) {
+    return res.status(404).json({ error: 'Player not found' });
+  }
+
   await prisma.savedPlayer.upsert({
     where: { userId_savedUserId: { userId: req.userId, savedUserId } },
     update: {},

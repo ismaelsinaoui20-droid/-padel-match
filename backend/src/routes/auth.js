@@ -1,9 +1,19 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 const prisma = require('../db');
+const { sendPasswordResetEmail } = require('../mailer');
 
 const router = express.Router();
+
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { error: 'Trop de tentatives, réessaie dans 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 function signToken(userId) {
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -45,7 +55,7 @@ router.post('/login', async (req, res) => {
   res.json({ token: signToken(user.id), user: toPublicUser(user) });
 });
 
-router.post('/forgot-password', async (req, res) => {
+router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
   const { email } = req.body;
   if (!email) {
     return res.status(400).json({ error: 'email is required' });
@@ -53,7 +63,8 @@ router.post('/forgot-password', async (req, res) => {
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
-    return res.status(404).json({ error: 'No account with this email' });
+    // On retourne 200 même si l'email n'existe pas pour ne pas permettre l'énumération de comptes.
+    return res.json({ expiresInMinutes: 15 });
   }
 
   const resetCode = String(Math.floor(100000 + Math.random() * 900000));
@@ -64,8 +75,19 @@ router.post('/forgot-password', async (req, res) => {
     data: { resetCode, resetCodeExpiresAt },
   });
 
-  // Dev mode: no email service configured yet, return the code directly.
-  res.json({ resetCode, expiresInMinutes: 15 });
+  if (process.env.NODE_ENV !== 'production' && !process.env.GMAIL_APP_PASSWORD) {
+    // Dev mode sans email configuré : retourne le code directement.
+    return res.json({ resetCode, expiresInMinutes: 15 });
+  }
+
+  try {
+    await sendPasswordResetEmail(user.email, resetCode);
+  } catch (err) {
+    console.error('[forgot-password] Échec envoi email:', err);
+    return res.status(500).json({ error: "Impossible d'envoyer l'email. Réessaie plus tard." });
+  }
+
+  res.json({ expiresInMinutes: 15 });
 });
 
 router.post('/reset-password', async (req, res) => {

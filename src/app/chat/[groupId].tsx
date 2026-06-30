@@ -344,9 +344,14 @@ export default function ChatScreen() {
             </ThemedText>
             <ThemedView style={styles.dayBannerLinks}>
               <Link href="/account">
+                <ThemedText type="link" themeColor="textSecondary">
+                  Mon compte
+                </ThemedText>
+              </Link>
+              <Link href="/messages">
                 <ThemedView style={styles.dayBannerLinkRow}>
                   <ThemedText type="link" themeColor="textSecondary">
-                    Mon compte
+                    Messages
                   </ThemedText>
                   <UnreadBadge count={unreadCount} />
                 </ThemedView>

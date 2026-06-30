@@ -17,13 +17,13 @@ import { useAuth } from '@/lib/auth-context';
 type Step = 'country' | 'city' | 'confirm';
 
 export default function RegionScreen() {
-  const { token, refreshUser } = useAuth();
+  const { token, user, refreshUser } = useAuth();
   const theme = useTheme();
   const [step, setStep] = useState<Step>('country');
   const [filter, setFilter] = useState('');
   const [country, setCountry] = useState<string | null>(null);
   const [city, setCity] = useState<string | null>(null);
-  const [age, setAge] = useState('');
+  const [age, setAge] = useState(user?.age != null ? String(user.age) : '');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 

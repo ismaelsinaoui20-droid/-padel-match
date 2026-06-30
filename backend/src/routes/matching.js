@@ -134,11 +134,21 @@ router.post('/find-duo', requireAuth, async (req, res) => {
     where: { userId: { in: [user.id, partner.id] } },
     include: { group: true },
   });
-  const coveredDates = new Set(existingMemberships.map((m) => m.group.date));
+
+  // Une date est couverte seulement si les DEUX sont déjà dans le MÊME groupe pour cette date.
+  const userGroupIds = new Set(
+    existingMemberships.filter((m) => m.userId === user.id).map((m) => m.groupId)
+  );
+  const sharedGroupIds = new Set(
+    existingMemberships.filter((m) => m.userId === partner.id && userGroupIds.has(m.groupId)).map((m) => m.groupId)
+  );
+  const coveredDates = new Set(
+    existingMemberships.filter((m) => sharedGroupIds.has(m.groupId)).map((m) => m.group.date)
+  );
 
   const groupsById = new Map();
   for (const m of existingMemberships) {
-    if (!groupsById.has(m.groupId)) {
+    if (sharedGroupIds.has(m.groupId) && !groupsById.has(m.groupId)) {
       groupsById.set(m.groupId, await loadGroup(m.groupId, user.id));
     }
   }

@@ -16,7 +16,7 @@ export type User = {
 export type MatchGroupMember = {
   id: string;
   userId: string;
-  user: User;
+  user: Pick<User, 'id' | 'name' | 'isAdmin'>;
 };
 
 export type TimeVote = {
