@@ -8,7 +8,7 @@ async function sendPasswordResetEmail(toEmail, resetCode) {
   const body = JSON.stringify({
     Messages: [
       {
-        From: { Email: 'padelmatch30@gmail.com', Name: 'Padel Match' },
+        From: { Email: 'padelmatch.app@outlook.com', Name: 'Padel Match' },
         To: [{ Email: toEmail }],
         Subject: 'Code de réinitialisation de mot de passe',
         HTMLPart: `
