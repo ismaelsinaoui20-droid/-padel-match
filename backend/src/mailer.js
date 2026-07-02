@@ -1,12 +1,11 @@
-const Mailjet = require('node-mailjet');
-
-const mailjet = Mailjet.apiConnect(
-  process.env.MAILJET_API_KEY,
-  process.env.MAILJET_SECRET_KEY
-);
+const https = require('https');
 
 async function sendPasswordResetEmail(toEmail, resetCode) {
-  await mailjet.post('send', { version: 'v3.1' }).request({
+  const credentials = Buffer.from(
+    `${process.env.MAILJET_API_KEY}:${process.env.MAILJET_SECRET_KEY}`
+  ).toString('base64');
+
+  const body = JSON.stringify({
     Messages: [
       {
         From: { Email: 'padelmatch30@gmail.com', Name: 'Padel Match' },
@@ -25,6 +24,32 @@ async function sendPasswordResetEmail(toEmail, resetCode) {
         `,
       },
     ],
+  });
+
+  return new Promise((resolve, reject) => {
+    const req = https.request(
+      {
+        hostname: 'api.mailjet.com',
+        path: '/v3.1/send',
+        method: 'POST',
+        headers: {
+          Authorization: `Basic ${credentials}`,
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(body),
+        },
+      },
+      (res) => {
+        let data = '';
+        res.on('data', (chunk) => (data += chunk));
+        res.on('end', () => {
+          if (res.statusCode >= 400) reject(new Error(`Mailjet error ${res.statusCode}: ${data}`));
+          else resolve();
+        });
+      }
+    );
+    req.on('error', reject);
+    req.write(body);
+    req.end();
   });
 }
 
