@@ -1,20 +1,10 @@
-const nodemailer = require('nodemailer');
-const dns = require('dns');
+const { Resend } = require('resend');
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  dnsLookup: (hostname, options, callback) => dns.lookup(hostname, { family: 4 }, callback),
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function sendPasswordResetEmail(toEmail, resetCode) {
-  await transporter.sendMail({
-    from: `"Padel Match" <${process.env.GMAIL_USER}>`,
+  const { error } = await resend.emails.send({
+    from: 'Padel Match <onboarding@resend.dev>',
     to: toEmail,
     subject: 'Code de réinitialisation de mot de passe',
     html: `
@@ -29,6 +19,7 @@ async function sendPasswordResetEmail(toEmail, resetCode) {
       </div>
     `,
   });
+  if (error) throw new Error(error.message);
 }
 
 module.exports = { sendPasswordResetEmail };
