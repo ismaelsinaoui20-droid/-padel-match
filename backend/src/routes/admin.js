@@ -25,7 +25,7 @@ router.get('/groups', requireAuth, requireAdmin, async (req, res) => {
 });
 
 router.get('/players', requireAuth, requireAdmin, async (req, res) => {
-  const players = await prisma.user.findMany({ where: { isAdmin: false }, orderBy: { createdAt: 'desc' } });
+  const players = await prisma.user.findMany({ where: { isAdmin: false, isBanned: false }, orderBy: { createdAt: 'desc' } });
   res.json({ players: players.map(toPublicUser) });
 });
 
