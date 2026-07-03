@@ -90,6 +90,26 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
   res.json({ expiresInMinutes: 15 });
 });
 
+router.post('/verify-reset-code', async (req, res) => {
+  const { email, code } = req.body;
+  if (!email || !code) {
+    return res.status(400).json({ error: 'email and code are required' });
+  }
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (
+    !user ||
+    !user.resetCode ||
+    user.resetCode !== code ||
+    !user.resetCodeExpiresAt ||
+    user.resetCodeExpiresAt < new Date()
+  ) {
+    return res.status(400).json({ error: 'Code invalide ou expiré' });
+  }
+
+  res.json({ valid: true });
+});
+
 router.post('/reset-password', async (req, res) => {
   const { email, code, newPassword } = req.body;
   if (!email || !code || !newPassword) {

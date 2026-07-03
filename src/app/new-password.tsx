@@ -1,39 +1,41 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, TextInput } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Card } from '@/components/card';
+import { PasswordInput } from '@/components/password-input';
 import { PrimaryButton } from '@/components/primary-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
-import { api } from '@/lib/api';
+import { useAuth } from '@/lib/auth-context';
 
-export default function ResetPasswordScreen() {
-  const { email } = useLocalSearchParams<{ email: string }>();
-  const theme = useTheme();
-  const [code, setCode] = useState('');
+export default function NewPasswordScreen() {
+  const { email, code } = useLocalSearchParams<{ email: string; code: string }>();
+  const { resetPassword } = useAuth();
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit() {
-    if (!code) {
-      setError('Entre le code reçu par email');
+    if (!newPassword || !confirmPassword) {
+      setError('Remplis les deux champs');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('Les mots de passe ne correspondent pas');
       return;
     }
 
     setError(null);
     setIsSubmitting(true);
     try {
-      await api.verifyResetCode(email, code.trim());
-      router.push({
-        pathname: '/new-password',
-        params: { email, code: code.trim() },
-      });
+      await resetPassword(email, code, newPassword);
+      router.replace('/');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Code invalide ou expiré');
+      setError(e instanceof Error ? e.message : 'Erreur lors de la réinitialisation');
     } finally {
       setIsSubmitting(false);
     }
@@ -44,22 +46,25 @@ export default function ResetPasswordScreen() {
       <SafeAreaView style={styles.safeArea}>
         <Card style={styles.card}>
           <ThemedText type="subtitle" style={styles.title}>
-            Code de vérification
-          </ThemedText>
-          <ThemedText themeColor="textSecondary" style={styles.subtitle}>
-            Code envoyé pour {email}. Valable 15 minutes.
-          </ThemedText>
-          <ThemedText themeColor="textSecondary" style={styles.subtitle}>
-            Si tu ne le reçois pas, vérifie tes spams.
+            Nouveau mot de passe
           </ThemedText>
 
-          <TextInput
-            style={[styles.input, { borderColor: theme.border, color: theme.text }]}
-            placeholder="Code reçu (6 chiffres)"
-            placeholderTextColor={theme.textSecondary}
-            keyboardType="number-pad"
-            value={code}
-            onChangeText={setCode}
+          <ThemedText themeColor="textSecondary" style={styles.label}>
+            Nouveau mot de passe :
+          </ThemedText>
+          <PasswordInput
+            placeholder="Nouveau mot de passe"
+            value={newPassword}
+            onChangeText={setNewPassword}
+          />
+
+          <ThemedText themeColor="textSecondary" style={styles.label}>
+            Confirmer le nouveau mot de passe :
+          </ThemedText>
+          <PasswordInput
+            placeholder="Confirmer le mot de passe"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
           />
 
           {error && (
@@ -69,7 +74,7 @@ export default function ResetPasswordScreen() {
           )}
 
           <PrimaryButton
-            label={isSubmitting ? 'Vérification...' : 'Valider le code'}
+            label={isSubmitting ? 'Validation...' : 'Réinitialiser le mot de passe'}
             onPress={handleSubmit}
             disabled={isSubmitting}
             style={styles.submit}
@@ -92,13 +97,7 @@ const styles = StyleSheet.create({
   },
   card: { gap: Spacing.three },
   title: { fontSize: 22, lineHeight: 28 },
-  subtitle: { fontSize: 14 },
-  input: {
-    borderWidth: 1.5,
-    borderRadius: 14,
-    padding: Spacing.three,
-    fontSize: 16,
-  },
+  label: { fontSize: 14 },
   error: { fontSize: 14 },
   submit: { marginTop: Spacing.one },
 });
