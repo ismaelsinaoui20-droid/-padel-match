@@ -32,7 +32,7 @@ router.get('/players', requireAuth, requireAdmin, async (req, res) => {
 router.get('/reports', requireAuth, requireAdmin, async (req, res) => {
   const reports = await prisma.playerReport.findMany({
     include: {
-      reportedUser: { select: { id: true, name: true, email: true } },
+      reportedUser: { select: { id: true, name: true, email: true, isBanned: true } },
       user: { select: { id: true, name: true } },
     },
     orderBy: { createdAt: 'desc' },

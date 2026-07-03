@@ -15,7 +15,7 @@ type Report = {
   id: string;
   reason: string;
   createdAt: string;
-  reportedUser: { id: string; name: string; email: string };
+  reportedUser: { id: string; name: string; email: string; isBanned: boolean };
   user: { id: string; name: string };
 };
 
@@ -32,6 +32,7 @@ export default function AdminReportsScreen() {
     if (!token) return;
     const res = await api.getAdminReports(token);
     setReports(res.reports);
+    setBanned(new Set(res.reports.filter((r) => r.reportedUser.isBanned).map((r) => r.reportedUser.id)));
     setIsLoading(false);
   }, [token]);
 
