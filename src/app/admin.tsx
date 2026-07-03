@@ -34,6 +34,12 @@ export default function AdminScreen() {
             onPress={() => router.push('/admin-players')}
             style={styles.secondButton}
           />
+          <PrimaryButton
+            label="🚨 Joueurs signalés"
+            variant="outline"
+            onPress={() => router.push('/admin-reports')}
+            style={styles.secondButton}
+          />
         </Card>
       </ThemedView>
     </ThemedView>

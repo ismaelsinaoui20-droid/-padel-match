@@ -29,6 +29,17 @@ router.get('/players', requireAuth, requireAdmin, async (req, res) => {
   res.json({ players: players.map(toPublicUser) });
 });
 
+router.get('/reports', requireAuth, requireAdmin, async (req, res) => {
+  const reports = await prisma.playerReport.findMany({
+    include: {
+      reportedUser: { select: { id: true, name: true, email: true } },
+      user: { select: { id: true, name: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+  res.json({ reports });
+});
+
 router.post('/groups/:groupId/add-player', requireAuth, requireAdmin, async (req, res) => {
   const { groupId } = req.params;
   const { mode, name, email, password } = req.body;
