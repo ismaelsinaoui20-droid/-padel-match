@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet } from 'react-native';
 
 import { Card } from '@/components/card';
 import { NoTranslate } from '@/components/no-translate';
@@ -25,6 +25,8 @@ export default function AdminReportsScreen() {
   const [reports, setReports] = useState<Report[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [banned, setBanned] = useState<Set<string>>(new Set());
+  const [confirmTarget, setConfirmTarget] = useState<{ id: string; name: string } | null>(null);
+  const [isBanning, setIsBanning] = useState(false);
 
   const refresh = useCallback(async () => {
     if (!token) return;
@@ -37,27 +39,18 @@ export default function AdminReportsScreen() {
     refresh();
   }, [refresh]);
 
-  function confirmBan(playerId: string, playerName: string) {
-    Alert.alert(
-      'Bannir le joueur',
-      `Voulez-vous vraiment bannir ${playerName} ? Il n'aura plus accès à l'application.`,
-      [
-        { text: 'Non', style: 'cancel' },
-        {
-          text: 'Oui, bannir',
-          style: 'destructive',
-          onPress: async () => {
-            if (!token) return;
-            try {
-              await api.banPlayer(token, playerId);
-              setBanned((prev) => new Set([...prev, playerId]));
-            } catch (e) {
-              Alert.alert('Erreur', e instanceof Error ? e.message : 'Impossible de bannir');
-            }
-          },
-        },
-      ]
-    );
+  async function executeBan() {
+    if (!token || !confirmTarget) return;
+    setIsBanning(true);
+    try {
+      await api.banPlayer(token, confirmTarget.id);
+      setBanned((prev) => new Set([...prev, confirmTarget.id]));
+      setConfirmTarget(null);
+    } catch (e) {
+      setConfirmTarget(null);
+    } finally {
+      setIsBanning(false);
+    }
   }
 
   if (isLoading) {
@@ -98,7 +91,7 @@ export default function AdminReportsScreen() {
               <PrimaryButton
                 label="🔨 Bannir le joueur"
                 variant="outline"
-                onPress={() => confirmBan(r.reportedUser.id, r.reportedUser.name)}
+                onPress={() => setConfirmTarget({ id: r.reportedUser.id, name: r.reportedUser.name })}
                 style={styles.banBtn}
               />
             )}
@@ -106,6 +99,37 @@ export default function AdminReportsScreen() {
         ))}
       </ScrollView>
     </ThemedView>
+
+      <Modal visible={!!confirmTarget} transparent animationType="fade" onRequestClose={() => setConfirmTarget(null)}>
+        <Pressable style={styles.overlay} onPress={() => setConfirmTarget(null)}>
+          <Pressable style={[styles.dialog, { backgroundColor: theme.background }]} onPress={() => {}}>
+            <ThemedText type="subtitle" style={styles.dialogTitle}>
+              Bannir le joueur
+            </ThemedText>
+            <ThemedText themeColor="textSecondary" style={styles.dialogMsg}>
+              Voulez-vous vraiment bannir{' '}
+              <ThemedText type="smallBold">
+                <NoTranslate>{confirmTarget?.name ?? ''}</NoTranslate>
+              </ThemedText>{' '}
+              ? Il n'aura plus accès à l'application.
+            </ThemedText>
+            <ThemedView style={styles.dialogBtns}>
+              <PrimaryButton
+                label="Non"
+                variant="outline"
+                onPress={() => setConfirmTarget(null)}
+                style={styles.dialogBtn}
+              />
+              <PrimaryButton
+                label={isBanning ? '...' : 'Oui, bannir'}
+                onPress={executeBan}
+                disabled={isBanning}
+                style={styles.dialogBtn}
+              />
+            </ThemedView>
+          </Pressable>
+        </Pressable>
+      </Modal>
   );
 }
 
@@ -125,4 +149,10 @@ const styles = StyleSheet.create({
   reporter: { fontSize: 13, marginTop: Spacing.one },
   banBtn: { marginTop: Spacing.two },
   bannedLabel: { fontSize: 14, marginTop: Spacing.two },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: Spacing.four },
+  dialog: { borderRadius: 16, padding: Spacing.four, gap: Spacing.three, width: '100%', maxWidth: 400 },
+  dialogTitle: { fontSize: 18 },
+  dialogMsg: { fontSize: 15 },
+  dialogBtns: { flexDirection: 'row', gap: Spacing.two },
+  dialogBtn: { flex: 1 },
 });
