@@ -13,6 +13,7 @@ router.get('/search', requireAuth, async (req, res) => {
   const players = await prisma.user.findMany({
     where: {
       isAdmin: false,
+      isBanned: false,
       id: { not: req.userId },
       name: { contains: q, mode: 'insensitive' },
     },
