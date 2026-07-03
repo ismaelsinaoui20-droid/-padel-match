@@ -239,6 +239,11 @@ export default function MatchingScreen() {
               👥 S'inscrire en binôme
             </ThemedText>
           </Link>
+          <Link href="/search-player" style={styles.quickLink}>
+            <ThemedText type="link" themeColor="primaryStrong">
+              🔍 Rechercher un joueur
+            </ThemedText>
+          </Link>
         </ThemedView>
 
         {hasDuoGroup ? (
