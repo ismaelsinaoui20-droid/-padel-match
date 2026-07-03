@@ -98,7 +98,6 @@ export default function AdminReportsScreen() {
           </Card>
         ))}
       </ScrollView>
-    </ThemedView>
 
       <Modal visible={!!confirmTarget} transparent animationType="fade" onRequestClose={() => setConfirmTarget(null)}>
         <Pressable style={styles.overlay} onPress={() => setConfirmTarget(null)}>
@@ -130,6 +129,7 @@ export default function AdminReportsScreen() {
           </Pressable>
         </Pressable>
       </Modal>
+    </ThemedView>
   );
 }
 
