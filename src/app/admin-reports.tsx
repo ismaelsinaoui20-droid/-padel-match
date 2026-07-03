@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet } from 'react-native';
 
 import { Card } from '@/components/card';
 import { NoTranslate } from '@/components/no-translate';
+import { PrimaryButton } from '@/components/primary-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
@@ -23,6 +24,7 @@ export default function AdminReportsScreen() {
   const theme = useTheme();
   const [reports, setReports] = useState<Report[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [banned, setBanned] = useState<Set<string>>(new Set());
 
   const refresh = useCallback(async () => {
     if (!token) return;
@@ -34,6 +36,29 @@ export default function AdminReportsScreen() {
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  function confirmBan(playerId: string, playerName: string) {
+    Alert.alert(
+      'Bannir le joueur',
+      `Voulez-vous vraiment bannir ${playerName} ? Il n'aura plus accès à l'application.`,
+      [
+        { text: 'Non', style: 'cancel' },
+        {
+          text: 'Oui, bannir',
+          style: 'destructive',
+          onPress: async () => {
+            if (!token) return;
+            try {
+              await api.banPlayer(token, playerId);
+              setBanned((prev) => new Set([...prev, playerId]));
+            } catch (e) {
+              Alert.alert('Erreur', e instanceof Error ? e.message : 'Impossible de bannir');
+            }
+          },
+        },
+      ]
+    );
+  }
 
   if (isLoading) {
     return (
@@ -65,6 +90,18 @@ export default function AdminReportsScreen() {
             <ThemedText themeColor="textSecondary" style={styles.reporter}>
               Signalé par : <NoTranslate>{r.user.name}</NoTranslate>
             </ThemedText>
+            {banned.has(r.reportedUser.id) ? (
+              <ThemedText themeColor="danger" style={styles.bannedLabel}>
+                🔴 Joueur banni
+              </ThemedText>
+            ) : (
+              <PrimaryButton
+                label="🔨 Bannir le joueur"
+                variant="outline"
+                onPress={() => confirmBan(r.reportedUser.id, r.reportedUser.name)}
+                style={styles.banBtn}
+              />
+            )}
           </Card>
         ))}
       </ScrollView>
@@ -86,4 +123,6 @@ const styles = StyleSheet.create({
   email: { fontSize: 13 },
   motifLabel: { fontSize: 14, marginTop: Spacing.one },
   reporter: { fontSize: 13, marginTop: Spacing.one },
+  banBtn: { marginTop: Spacing.two },
+  bannedLabel: { fontSize: 14, marginTop: Spacing.two },
 });

@@ -32,6 +32,7 @@ model User {
   level          Level?
   availableDates String[] @default([])
   isAdmin        Boolean  @default(false)
+  isBanned       Boolean  @default(false)
   createdAt      DateTime @default(now())
   resetCode           String?
   resetCodeExpiresAt  DateTime?

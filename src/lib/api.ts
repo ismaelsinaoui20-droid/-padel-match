@@ -185,6 +185,9 @@ export const api = {
   getAdminReports: (token: string) =>
     request<{ reports: Array<{ id: string; reason: string; createdAt: string; reportedUser: { id: string; name: string; email: string }; user: { id: string; name: string } }> }>('/admin/reports', { token }),
 
+  banPlayer: (token: string, playerId: string) =>
+    request<{ ok: boolean }>(`/admin/players/${playerId}/ban`, { method: 'POST', token }),
+
   addPlayerToGroup: (
     token: string,
     groupId: string,

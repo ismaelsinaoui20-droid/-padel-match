@@ -40,6 +40,14 @@ router.get('/reports', requireAuth, requireAdmin, async (req, res) => {
   res.json({ reports });
 });
 
+router.post('/players/:playerId/ban', requireAuth, requireAdmin, async (req, res) => {
+  const { playerId } = req.params;
+  const user = await prisma.user.findUnique({ where: { id: playerId } });
+  if (!user || user.isAdmin) return res.status(404).json({ error: 'Joueur introuvable' });
+  await prisma.user.update({ where: { id: playerId }, data: { isBanned: true } });
+  res.json({ ok: true });
+});
+
 router.post('/groups/:groupId/add-player', requireAuth, requireAdmin, async (req, res) => {
   const { groupId } = req.params;
   const { mode, name, email, password } = req.body;

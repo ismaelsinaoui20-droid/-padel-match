@@ -52,6 +52,10 @@ router.post('/login', async (req, res) => {
     return res.status(401).json({ error: 'Invalid email or password' });
   }
 
+  if (user.isBanned) {
+    return res.status(403).json({ error: 'Votre compte a été banni suite à un signalement.' });
+  }
+
   res.json({ token: signToken(user.id), user: toPublicUser(user) });
 });
 
