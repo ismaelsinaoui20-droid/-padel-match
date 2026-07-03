@@ -45,9 +45,39 @@ router.post('/players/:playerId/ban', requireAuth, requireAdmin, async (req, res
   const user = await prisma.user.findUnique({ where: { id: playerId } });
   if (!user || user.isAdmin) return res.status(404).json({ error: 'Joueur introuvable' });
 
+  // Trouver les groupes du joueur avant de le retirer
+  const memberships = await prisma.matchGroupMember.findMany({ where: { userId: playerId }, select: { groupId: true } });
+  const groupIds = memberships.map((m) => m.groupId);
+
   await prisma.user.update({ where: { id: playerId }, data: { isBanned: true } });
+
+  // Supprimer les votes du joueur dans ces groupes
+  await prisma.timeVote.deleteMany({ where: { userId: playerId } });
+  await prisma.courtBookingVote.deleteMany({ where: { userId: playerId } });
+
+  // Retirer le joueur de tous ses groupes
   await prisma.matchGroupMember.deleteMany({ where: { userId: playerId } });
-  await prisma.matchGroup.deleteMany({ where: { members: { none: {} } } });
+
+  if (groupIds.length > 0) {
+    // Remettre les groupes qui n'ont plus 4 membres à OPEN
+    await prisma.matchGroup.updateMany({
+      where: { id: { in: groupIds }, status: 'FULL' },
+      data: { status: 'OPEN' },
+    });
+
+    // Supprimer les groupes devenus vides (en cascade)
+    const emptyGroups = await prisma.matchGroup.findMany({
+      where: { id: { in: groupIds }, members: { none: {} } },
+      select: { id: true },
+    });
+    const emptyIds = emptyGroups.map((g) => g.id);
+    if (emptyIds.length > 0) {
+      await prisma.message.deleteMany({ where: { groupId: { in: emptyIds } } });
+      await prisma.timeVote.deleteMany({ where: { groupId: { in: emptyIds } } });
+      await prisma.courtBookingVote.deleteMany({ where: { groupId: { in: emptyIds } } });
+      await prisma.matchGroup.deleteMany({ where: { id: { in: emptyIds } } });
+    }
+  }
 
   res.json({ ok: true });
 });
