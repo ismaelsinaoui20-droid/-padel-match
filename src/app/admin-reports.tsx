@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet } from 'react-native';
 
 import { Card } from '@/components/card';
@@ -28,17 +29,16 @@ export default function AdminReportsScreen() {
   const [confirmTarget, setConfirmTarget] = useState<{ id: string; name: string } | null>(null);
   const [isBanning, setIsBanning] = useState(false);
 
-  const refresh = useCallback(async () => {
-    if (!token) return;
-    const res = await api.getAdminReports(token);
-    setReports(res.reports);
-    setBanned(new Set(res.reports.filter((r) => r.reportedUser.isBanned).map((r) => r.reportedUser.id)));
-    setIsLoading(false);
-  }, [token]);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
+  useFocusEffect(
+    useCallback(() => {
+      if (!token) return;
+      api.getAdminReports(token).then((res) => {
+        setReports(res.reports);
+        setBanned(new Set(res.reports.filter((r) => r.reportedUser.isBanned).map((r) => r.reportedUser.id)));
+        setIsLoading(false);
+      });
+    }, [token])
+  );
 
   async function executeBan() {
     if (!token || !confirmTarget) return;
