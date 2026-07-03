@@ -49,6 +49,9 @@ export default function ResetPasswordScreen() {
           <ThemedText themeColor="textSecondary" style={styles.subtitle}>
             Code envoyé pour {email}. Valable 15 minutes.
           </ThemedText>
+          <ThemedText themeColor="textSecondary" style={styles.spamHint}>
+            Si tu ne le reçois pas, vérifie tes spams.
+          </ThemedText>
 
           <TextInput
             style={[styles.input, { borderColor: theme.border, color: theme.text }]}
@@ -95,6 +98,7 @@ const styles = StyleSheet.create({
   card: { gap: Spacing.three },
   title: { fontSize: 22, lineHeight: 28 },
   subtitle: { fontSize: 14 },
+  spamHint: { fontSize: 12 },
   input: {
     borderWidth: 1.5,
     borderRadius: 14,
