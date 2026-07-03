@@ -53,7 +53,7 @@ async function sendPasswordResetEmail(toEmail, resetCode) {
   const message = [
     'From: Padel Match <padelmatch30@gmail.com>',
     `To: ${toEmail}`,
-    'Subject: Code de réinitialisation de mot de passe',
+    `Subject: =?UTF-8?B?${Buffer.from('Code de réinitialisation de mot de passe').toString('base64')}?=`,
     'MIME-Version: 1.0',
     'Content-Type: text/html; charset=utf-8',
     '',
