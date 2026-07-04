@@ -182,6 +182,9 @@ export const api = {
 
   getAdminPlayers: (token: string) => request<{ players: User[] }>('/admin/players', { token }),
 
+  getBannedPlayers: (token: string) =>
+    request<{ players: User[]; count: number }>('/admin/banned-players', { token }),
+
   getAdminReports: (token: string) =>
     request<{ reports: Array<{ id: string; reason: string; createdAt: string; reportedUser: { id: string; name: string; email: string; isBanned: boolean }; user: { id: string; name: string } }> }>('/admin/reports', { token }),
 

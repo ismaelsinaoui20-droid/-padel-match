@@ -1,4 +1,5 @@
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { Card } from '@/components/card';
@@ -6,10 +7,19 @@ import { PrimaryButton } from '@/components/primary-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 
 export default function AdminScreen() {
-  const { signOut } = useAuth();
+  const { token, signOut } = useAuth();
+  const [bannedCount, setBannedCount] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!token) return;
+      api.getBannedPlayers(token).then((res) => setBannedCount(res.count));
+    }, [token])
+  );
 
   return (
     <ThemedView style={styles.container}>
@@ -40,6 +50,14 @@ export default function AdminScreen() {
             onPress={() => router.push('/admin-reports')}
             style={styles.secondButton}
           />
+          {bannedCount > 0 && (
+            <PrimaryButton
+              label={`🔴 Joueurs bannis (${bannedCount})`}
+              variant="outline"
+              onPress={() => router.push('/admin-banned')}
+              style={styles.secondButton}
+            />
+          )}
         </Card>
       </ThemedView>
     </ThemedView>
