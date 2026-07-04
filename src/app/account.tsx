@@ -29,6 +29,26 @@ export default function AccountScreen() {
       <ThemedView style={styles.content}>
         <Card style={styles.card}>
           <ThemedText type="smallBold" themeColor="textSecondary" style={styles.label}>
+            NOM ET PRÉNOM
+          </ThemedText>
+          <ThemedText style={styles.value}>{user?.name ?? '—'}</ThemedText>
+
+          <ThemedText type="smallBold" themeColor="textSecondary" style={styles.label}>
+            ÂGE
+          </ThemedText>
+          <ThemedText style={styles.value}>{user?.age ? `${user.age} ans` : '—'}</ThemedText>
+
+          <ThemedText type="smallBold" themeColor="textSecondary" style={styles.label}>
+            NIVEAU
+          </ThemedText>
+          <ThemedText style={styles.value}>{user?.level ?? '—'}</ThemedText>
+
+          <ThemedText type="smallBold" themeColor="textSecondary" style={styles.label}>
+            VILLE
+          </ThemedText>
+          <ThemedText style={styles.value}>{user?.region ?? '—'}</ThemedText>
+
+          <ThemedText type="smallBold" themeColor="textSecondary" style={styles.label}>
             EMAIL
           </ThemedText>
           <ThemedText style={styles.value}>{user?.email}</ThemedText>
