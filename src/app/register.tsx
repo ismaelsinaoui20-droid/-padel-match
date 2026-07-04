@@ -52,7 +52,7 @@ export default function RegisterScreen() {
 
           <TextInput
             style={[styles.input, { borderColor: theme.border, color: theme.text }]}
-            placeholder="Nom"
+            placeholder="Nom et prénom"
             placeholderTextColor={theme.textSecondary}
             value={name}
             onChangeText={setName}
