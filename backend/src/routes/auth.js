@@ -66,8 +66,11 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
   }
 
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user || user.isBanned) {
+  if (!user) {
     return res.json({ expiresInMinutes: 15 });
+  }
+  if (user.isBanned) {
+    return res.status(403).json({ error: 'Ce compte a été banni. Réinitialisation impossible.' });
   }
 
   const resetCode = String(Math.floor(100000 + Math.random() * 900000));
