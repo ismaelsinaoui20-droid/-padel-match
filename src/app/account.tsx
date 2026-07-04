@@ -1,6 +1,6 @@
 import { Link, router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable, ScrollView, StyleSheet } from 'react-native';
 
 import { Card } from '@/components/card';
 import { ThemedText } from '@/components/themed-text';
@@ -26,7 +26,7 @@ export default function AccountScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedView style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content}>
         <Card style={styles.card}>
           <ThemedText type="smallBold" themeColor="textSecondary" style={styles.label}>
             NOM ET PRÉNOM
@@ -92,7 +92,7 @@ export default function AccountScreen() {
             Se déconnecter
           </ThemedText>
         </Pressable>
-      </ThemedView>
+      </ScrollView>
     </ThemedView>
   );
 }
