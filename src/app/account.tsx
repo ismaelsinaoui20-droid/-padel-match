@@ -1,6 +1,6 @@
 import { Link, router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 
 import { Card } from '@/components/card';
 import { ThemedText } from '@/components/themed-text';
@@ -26,7 +26,7 @@ export default function AccountScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ThemedView style={styles.content}>
         <Card style={styles.card}>
           <ThemedText type="smallBold" themeColor="textSecondary" style={styles.label}>
             NOM ET PRÉNOM
@@ -64,6 +64,18 @@ export default function AccountScreen() {
               Changer le mot de passe
             </ThemedText>
           </Link>
+
+          <Pressable
+            onPress={async () => {
+              await signOut();
+              router.replace('/login');
+            }}
+            style={styles.logout}
+          >
+            <ThemedText type="link" themeColor="danger">
+              Se déconnecter
+            </ThemedText>
+          </Pressable>
         </Card>
 
         <Card style={styles.card}>
@@ -79,19 +91,8 @@ export default function AccountScreen() {
           <Link href="/saved-players" style={styles.menuLink}>
             <ThemedText>⭐ Joueurs enregistrés</ThemedText>
           </Link>
-          <Pressable
-            onPress={async () => {
-              await signOut();
-              router.replace('/login');
-            }}
-            style={styles.logout}
-          >
-            <ThemedText type="link" themeColor="danger">
-              Se déconnecter
-            </ThemedText>
-          </Pressable>
         </Card>
-      </ScrollView>
+      </ThemedView>
     </ThemedView>
   );
 }
