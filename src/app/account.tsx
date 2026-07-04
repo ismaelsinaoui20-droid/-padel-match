@@ -79,19 +79,18 @@ export default function AccountScreen() {
           <Link href="/saved-players" style={styles.menuLink}>
             <ThemedText>⭐ Joueurs enregistrés</ThemedText>
           </Link>
+          <Pressable
+            onPress={async () => {
+              await signOut();
+              router.replace('/login');
+            }}
+            style={styles.logout}
+          >
+            <ThemedText type="link" themeColor="danger">
+              Se déconnecter
+            </ThemedText>
+          </Pressable>
         </Card>
-
-        <Pressable
-          onPress={async () => {
-            await signOut();
-            router.replace('/login');
-          }}
-          style={styles.logout}
-        >
-          <ThemedText type="link" themeColor="danger">
-            Se déconnecter
-          </ThemedText>
-        </Pressable>
       </ScrollView>
     </ThemedView>
   );
