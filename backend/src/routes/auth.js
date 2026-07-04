@@ -66,8 +66,7 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
   }
 
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) {
-    // On retourne 200 même si l'email n'existe pas pour ne pas permettre l'énumération de comptes.
+  if (!user || user.isBanned) {
     return res.json({ expiresInMinutes: 15 });
   }
 
