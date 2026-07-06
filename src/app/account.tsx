@@ -48,7 +48,7 @@ export default function AccountScreen() {
           </ThemedText>
           <ThemedView style={styles.row}>
             <ThemedText style={styles.value}>{user?.region ?? '—'}</ThemedText>
-            <Link href="/region" style={styles.editLink}>
+            <Link href={{ pathname: '/region', params: { fromAccount: '1' } }} style={styles.editLink}>
               <ThemedText type="link" themeColor="primaryStrong">Modifier</ThemedText>
             </Link>
           </ThemedView>

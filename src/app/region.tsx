@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, TextInput } from 'react-native';
 
@@ -19,6 +19,8 @@ type Step = 'country' | 'city' | 'confirm';
 export default function RegionScreen() {
   const { token, user, refreshUser } = useAuth();
   const theme = useTheme();
+  const { fromAccount } = useLocalSearchParams<{ fromAccount?: string }>();
+  const isFromAccount = fromAccount === '1';
   const [step, setStep] = useState<Step>('country');
   const [filter, setFilter] = useState('');
   const [country, setCountry] = useState<string | null>(null);
@@ -41,8 +43,15 @@ export default function RegionScreen() {
     setStep('city');
   }
 
-  function selectCity(value: string) {
+  async function selectCity(value: string) {
     setCity(value);
+    if (isFromAccount) {
+      if (!token) return;
+      await api.updateProfile(token, { region: value });
+      await refreshUser();
+      router.replace('/account');
+      return;
+    }
     setStep('confirm');
   }
 
