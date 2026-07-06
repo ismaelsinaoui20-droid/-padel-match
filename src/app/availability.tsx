@@ -20,7 +20,7 @@ export default function AvailabilityScreen() {
   const theme = useTheme();
   const [cycleDates, setCycleDates] = useState<CycleDate[]>([]);
   const [isLoadingCycle, setIsLoadingCycle] = useState(true);
-  const [availableDates, setAvailableDates] = useState<string[]>(user?.availableDates ?? []);
+  const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -28,6 +28,8 @@ export default function AvailabilityScreen() {
     if (!token) return;
     api.getCycle(token).then((res) => {
       setCycleDates(res.dates);
+      const validDates = res.dates.map((d) => d.date);
+      setAvailableDates((user?.availableDates ?? []).filter((d) => validDates.includes(d)));
       setIsLoadingCycle(false);
     });
   }, [token]);
