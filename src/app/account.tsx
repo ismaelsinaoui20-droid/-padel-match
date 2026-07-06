@@ -46,7 +46,12 @@ export default function AccountScreen() {
           <ThemedText type="smallBold" themeColor="textSecondary" style={styles.label}>
             VILLE
           </ThemedText>
-          <ThemedText style={styles.value}>{user?.region ?? '—'}</ThemedText>
+          <ThemedView style={styles.row}>
+            <ThemedText style={styles.value}>{user?.region ?? '—'}</ThemedText>
+            <Link href="/region" style={styles.editLink}>
+              <ThemedText type="link" themeColor="primaryStrong">Modifier</ThemedText>
+            </Link>
+          </ThemedView>
 
           <ThemedText type="smallBold" themeColor="textSecondary" style={styles.label}>
             EMAIL
@@ -113,4 +118,6 @@ const styles = StyleSheet.create({
   menuLink: { paddingVertical: Spacing.two },
   menuLinkRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: 'transparent' },
   logout: { alignSelf: 'center', marginTop: Spacing.two },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'transparent' },
+  editLink: {},
 });
