@@ -29,6 +29,12 @@ router.get('/players', requireAuth, requireAdmin, async (req, res) => {
   res.json({ players: players.map(toPublicUser) });
 });
 
+router.post('/reset-cycle', requireAuth, requireAdmin, async (req, res) => {
+  const { resetCycle } = require('../cron');
+  await resetCycle();
+  res.json({ ok: true });
+});
+
 router.get('/banned-players', requireAuth, requireAdmin, async (req, res) => {
   const players = await prisma.user.findMany({ where: { isAdmin: false, isBanned: true }, orderBy: { createdAt: 'desc' } });
   res.json({ players: players.map(toPublicUser), count: players.length });
