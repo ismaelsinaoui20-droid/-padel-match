@@ -118,6 +118,6 @@ const styles = StyleSheet.create({
   menuLink: { paddingVertical: Spacing.two },
   menuLinkRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: 'transparent' },
   logout: { alignSelf: 'center', marginTop: Spacing.two },
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'transparent' },
+  row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: 'transparent' },
   editLink: {},
 });
