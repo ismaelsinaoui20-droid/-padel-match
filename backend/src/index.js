@@ -37,15 +37,15 @@ registerChatSockets(io);
 
 scheduleCycleReset();
 
-// Au démarrage, vérifie si un reset de cycle est dû (Render s'éteint la nuit, le cron peut rater)
+// Au démarrage, vérifie si des groupes de l'ancien cycle existent encore
 async function checkCycleOnStartup() {
   try {
-    const today = toISODate(new Date());
-    const cycleStart = toISODate(getCycleStart());
-    if (today !== cycleStart) return;
-    const lastGroup = await prisma.matchGroup.findFirst({ orderBy: { createdAt: 'desc' } });
-    if (lastGroup && lastGroup.createdAt < getCycleStart()) {
-      console.log('[startup] Nouveau cycle détecté, reset en cours...');
+    const cycleStart = getCycleStart();
+    const oldGroup = await prisma.matchGroup.findFirst({
+      where: { createdAt: { lt: cycleStart } },
+    });
+    if (oldGroup) {
+      console.log('[startup] Anciens groupes détectés, reset du cycle en cours...');
       await resetCycle();
     }
   } catch (err) {

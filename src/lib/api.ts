@@ -182,9 +182,6 @@ export const api = {
 
   getAdminPlayers: (token: string) => request<{ players: User[] }>('/admin/players', { token }),
 
-  resetCycle: (token: string) =>
-    request<{ ok: boolean }>('/admin/reset-cycle', { method: 'POST', token }),
-
   getBannedPlayers: (token: string) =>
     request<{ players: User[]; count: number }>('/admin/banned-players', { token }),
 
