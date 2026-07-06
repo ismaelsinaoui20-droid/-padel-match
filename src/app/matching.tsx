@@ -141,9 +141,7 @@ export default function MatchingScreen() {
   const theme = useTheme();
   const [groups, setGroups] = useState<MatchGroup[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [searchError, setSearchError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSearching, setIsSearching] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
   const loadStatus = useCallback(async () => {
@@ -161,20 +159,6 @@ export default function MatchingScreen() {
   useEffect(() => {
     loadStatus();
   }, [loadStatus]);
-
-  async function handleSearchSolo() {
-    if (!token) return;
-    setIsSearching(true);
-    setSearchError(null);
-    try {
-      const result = await api.findMatch(token);
-      setGroups(result.groups);
-    } catch (e) {
-      setSearchError(e instanceof Error ? e.message : 'Recherche impossible');
-    } finally {
-      setIsSearching(false);
-    }
-  }
 
   useEffect(() => {
     if (!token) return;
@@ -246,22 +230,12 @@ export default function MatchingScreen() {
           </Link>
         </ThemedView>
 
-        {hasDuoGroup ? (
-          <ThemedText themeColor="textSecondary" style={styles.searchError}>
-            Tu es déjà inscrit en binôme, la recherche de partenaires solo est désactivée.
-          </ThemedText>
-        ) : (
+        {!hasDuoGroup && (
           <PrimaryButton
-            label={isSearching ? 'Recherche...' : '🔍 Chercher des partenaires'}
-            onPress={handleSearchSolo}
-            disabled={isSearching}
+            label="🔍 Chercher des partenaires"
+            onPress={() => router.push('/availability')}
             style={styles.searchButton}
           />
-        )}
-        {searchError && (
-          <ThemedText themeColor="danger" style={styles.searchError}>
-            {searchError}
-          </ThemedText>
         )}
 
         {groups.map((group) => (

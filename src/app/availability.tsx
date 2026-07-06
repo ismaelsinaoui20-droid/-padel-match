@@ -44,6 +44,7 @@ export default function AvailabilityScreen() {
     try {
       await api.updateProfile(token, { availableDates });
       await refreshUser();
+      await api.findMatch(token);
       router.replace('/matching');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Mise à jour impossible');
